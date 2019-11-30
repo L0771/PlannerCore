@@ -1,33 +1,39 @@
 OB_helper = OB_helper or {}
 
-function OB_helper.find_ore(entities)
+function OB_helper.find_ore(data)
     -- Find the most common ore in the area, or ores if they have the same product.
+    local entities = data.entities
     local ore_counts_name = {}
     local ore_counts_by_product = {}
     local ore_products_to_names = {}
-    for k, entity in pairs(entities) do
-        if entity.valid and entity.prototype.resource_category == "basic-solid" then
-            local name
-            if #entity.prototype.mineable_properties.products == 1 then
-                name = entity.prototype.mineable_properties.products[1].name
-            else
-                local product_names =
-                    table.map(
-                    entity.prototype.mineable_properties.products,
-                    function(product)
-                        return product.name
+    local miner_proto = game.entity_prototypes[data.miner_name]
+    for category, boolCategory in pairs(miner_proto.resource_categories) do
+        if boolCategory then
+            for k, entity in pairs(entities) do
+                if entity.valid and entity.prototype.resource_category == "basic-solid" then
+                    local name
+                    if #entity.prototype.mineable_properties.products == 1 then
+                        name = entity.prototype.mineable_properties.products[1].name
+                    else
+                        local product_names =
+                            table.map(
+                            entity.prototype.mineable_properties.products,
+                            function(product)
+                                return product.name
+                            end
+                        )
+                        table.sort(product_names)
+                        name = table.concat(product_names, "|")
                     end
-                )
-                table.sort(product_names)
-                name = table.concat(product_names, "|")
+                    if ore_counts_by_product[name] then
+                        ore_counts_by_product[name] = ore_counts_by_product[name] + 1
+                    else
+                        ore_counts_by_product[name] = 0
+                    end
+                    ore_products_to_names[name] = ore_products_to_names[name] or {}
+                    ore_products_to_names[name][entity.name] = true
+                end
             end
-            if ore_counts_by_product[name] then
-                ore_counts_by_product[name] = ore_counts_by_product[name] + 1
-            else
-                ore_counts_by_product[name] = 0
-            end
-            ore_products_to_names[name] = ore_products_to_names[name] or {}
-            ore_products_to_names[name][entity.name] = true
         end
     end
 
