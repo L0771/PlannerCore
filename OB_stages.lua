@@ -5,7 +5,7 @@ OB_stage = {}
 PlannerCore.stage_function_table.OB_stage = OB_stage
 
 function OB_stage.find_ore(state)
-    local ore_names = OB_helper.find_ore(state.event_entities)
+    local ore_names = OB_helper.find_ore({ entities=state.event_entities, miner_name=state.conf.miner_name })
     if ore_names == nil then
         state.player.print({"outpost-builder.no-ore"})
         return OB_helper.on_error(state)
